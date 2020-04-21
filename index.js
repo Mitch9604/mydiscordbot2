@@ -339,14 +339,9 @@ bot.on('message', message=>{
         case 'dmuser':
             if(!message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
         
-            let dmUser = message.mentions.users.first();
-            if(!args[1]) return message.reply("Please specify a user");
-            if(!dmUser){
-                dmUser = args[1];
-                var dmMessage = args.join(' ').slice(26);
-            }else{
-                var dmMessage = args.join(' ').slice (28);
-            };
+            let dmUser = args[1]
+            if(!args[1]) return message.reply("Please specify a user id!");
+            if(dmUser.length !== 18) return message.reply("Please specify a user id!");
 
             
             dmUser.createDM();
