@@ -164,7 +164,7 @@ bot.on('message', message=>{
     if(!reportChannelList.getItem(message.guild.id)){
         var reportChannelID = message.channel.id;
     }else{
-        var reportChannelID = reportChannnelList.getItem(message.guild.id);
+        var reportChannelID = reportChannelList.getItem(message.guild.id);
     };
 
     if(!unbanLogsChannelList.getItem(message.guild.id)){
