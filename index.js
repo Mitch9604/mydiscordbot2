@@ -14,6 +14,8 @@ setInterval(() => {
 const Discord = require('discord.js');
 const bot = new Discord.Client();
 
+var test = ['a'['a','b'],'b'['a','b']]
+
 const token = process.env.TOKEN;
 
 var PREFIX = '!';
@@ -25,7 +27,59 @@ const embedImage = 'https://cdn.discordapp.com/avatars/257714467301752835/993e93
 
 const embedColor = '#008080'
 
+//Hashtable function
 
+function hashKey(s, tableSize) {
+    let hash = 17
+
+    for (var i = 0; i < s.length; i++){
+        hash = (7 * hash * s.charCodeAt(i)) % tableSize;
+    }
+    return hash;
+}
+
+
+class Hashtable {
+    
+    table = new Array(5)
+    
+    setItem = (key, value) => {
+        const idx = hashKey(key, this.table.length);
+        if(this.table[idx]){
+            this.table[idx].push([key, value])
+        }else{
+            this.table[idx] = [[key, value]];
+        }
+    };
+
+    getItem = key => {
+        const idx = hashKey(key, this.table.length)
+        if(!this.table[idx]) {
+            return null 
+        }
+        return this.table[idx].find(x => x[0] === key)[1];
+    };
+
+    removeItem = key => {
+        const idx = hashKey(key, this.table.length)
+        if(!this.table[idx]){
+            return null;
+        }else{
+            this.table[idx] = null;
+        }
+    };
+}
+
+//////////-End of hashtable function-\\\\\\\\\\\
+
+
+var serverIDList = new Hashtable();
+
+var warnChannelList = new Hashtable();
+
+var reportChannelList = new Hashtable();
+
+var unbanLogsChannelList = new Hashtable();
 
 
 bot.on('ready', () =>{
@@ -36,18 +90,94 @@ bot.on('message', message=>{
     
     let args = message.content.substring(PREFIX.length).split(' ')
 
-    if(message.guild.id === '691048098990129163'){
-        var warnChannelID = '691084911049703475';
-        var reportChannnelID = '691085915644362764';
-        var unbanLogsChannelID = '700837359343763476';
-    }else{
-        var warnChannelID = '353292340686749697';
-        var reportChannnelID = '689597720348196895';
-        var unbanLogsChannelID = '700835316306673715';
+    if(args[0]=='sync'){
+        
+        if(!message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!")
+
+        if(!serverIDList.getItem(message.guild.id) == null) return message.reply("Bot has already been synced.");
+        serverIDList.setItem(message.guild.id, message.guild.id);
+        message.channel.send("I have finished syncing to your server")
+    
+    }else{};
+    if(args[0] == 'set'){
+        switch(args[1]){
+        
+            case 'warnchannel':
+                var channelID = args[2];
+                if(channelID.length !== 18){
+                    return message.reply('This ID is not valid.')
+                }
+                
+                if(warnChannelList.getItem(message.guild.id) == null){
+                    warnChannelList.setItem(message.guild.id, channelID);
+                }else{
+                    warnChannelList.removeItem(message.guild.id)
+                    warnChannelList.setItem(message.guild.id, channelID)
+                }
+                
+                message.reply('Set Warn Channel!')
+            break;
+            case 'reportlogchannel':
+                var channelID = args[2];
+                if(channelID.length !== 18){
+                    return message.reply('This ID is not valid.')
+                }
+
+                if(reportChannelList.getItem(message.guild.id) == null){
+                    reportChannelList.setItem(message.guild.id, channelID);
+                }else{
+                    reportChannelList.removeItem(message.guild.id)
+                    reportChannelList.setItem(message.guild.id, channelID)
+                }
+
+                message.reply('Set Report logs Channel')
+            break;
+            case 'unbanlogchannel':
+                var channelID = args[2];
+                if(channelID.length !== 18){
+                    return message.reply('This ID is not valid.')
+                }
+                
+                if(unbanLogsChannelList.getItem(message.guild.id) == null){
+                    unbanLogsChannelList.setItem(message.guild.id, channelID);
+                }else{
+                    unbanLogsChannelList.removeItem(message.guild.id)
+                    unbanLogsChannelList.setItem(message.guild.id, channelID)
+                }
+
+                message.reply('Set Unban Logs Channel')
+            break;
+        }
+        
+        if (args[1] == null){
+            return message.reply('Wrong usage! The correct usages are: `!set warnchannel {Channel ID}`, `!set reportlogchannel {Channel ID}`, `!set unbanlogchannel {Channel ID}`')
+        }    
     }
     
+    if(!warnChannelList.getItem(message.guild.id)){
+        var warnChannelID = message.channel.id
+    }else{
+        var warnChannelID = warnChannelList.getItem(message.guild.id);
+    };
+
+    
+    if(!reportChannelList.getItem(message.guild.id)){
+        var reportChannelID = message.channel.id;
+    }else{
+        var reportChannelID = reportChannnelList.getItem(message.guild.id);
+    };
+
+    if(!unbanLogsChannelList.getItem(message.guild.id)){
+        var unbanLogsChannelID = message.channel.id
+    }else{
+        var unbanLogsChannelID = unbanLogsChannelList.getItem(message.guild.id)
+    };
+    
+    
+    
+    
     const warnChannel = bot.channels.cache.find(channel => channel.id === warnChannelID);
-    const reportChannnel = bot.channels.cache.find(channel => channel.id === reportChannnelID);
+    const reportChannel = bot.channels.cache.find(channel => channel.id === reportChannelID);
     const unbanLogsChannel = bot.channels.cache.find(channel => channel.id === unbanLogsChannelID);
 
     switch(args[0]){
@@ -196,7 +326,7 @@ bot.on('message', message=>{
             //const reportChannnelID = '689597720348196895'
             //const reportChannnel = bot.channels.cache.find(channel => channel.id === reportChannnelID)
                 
-            reportChannnel.send(reportEmbed);
+            reportChannel.send(reportEmbed);
         break;    
         case 'kick':
             if(!message.guild.member(message.author).hasPermission('KICK_MEMBERS')) return message.reply('Sorry, you cant do that!')
