@@ -29,57 +29,7 @@ const embedColor = '#008080'
 
 //Hashtable function
 
-function hashKey(s, tableSize) {
-    let hash = 17
 
-    for (var i = 0; i < s.length; i++){
-        hash = (7 * hash * s.charCodeAt(i)) % tableSize;
-    }
-    return hash;
-}
-
-
-class Hashtable {
-    
-    table = new Array(5)
-    
-    setItem = (key, value) => {
-        const idx = hashKey(key, this.table.length);
-        if(this.table[idx]){
-            this.table[idx].push([key, value])
-        }else{
-            this.table[idx] = [[key, value]];
-        }
-    };
-
-    getItem = key => {
-        const idx = hashKey(key, this.table.length)
-        if(!this.table[idx]) {
-            return null 
-        }
-        return this.table[idx].find(x => x[0] === key)[1];
-    };
-
-    removeItem = key => {
-        const idx = hashKey(key, this.table.length)
-        if(!this.table[idx]){
-            return null;
-        }else{
-            this.table[idx] = null;
-        }
-    };
-}
-
-//////////-End of hashtable function-\\\\\\\\\\\
-
-
-var serverIDList = new Hashtable();
-
-var warnChannelList = new Hashtable();
-
-var reportChannelList = new Hashtable();
-
-var unbanLogsChannelList = new Hashtable();
 
 
 bot.on('ready', () =>{
@@ -87,7 +37,55 @@ bot.on('ready', () =>{
 })
 
 bot.on('message', message=>{
+    function hashKey(s, tableSize) {
+        let hash = 17
     
+        for (var i = 0; i < s.length; i++){
+            hash = (7 * hash * s.charCodeAt(i)) % tableSize;
+        }
+        return hash;
+    }
+    
+    
+    class Hashtable {
+        
+        table = new Array(5)
+        
+        setItem = (key, value) => {
+            const idx = hashKey(key, this.table.length);
+            if(this.table[idx]){
+                this.table[idx].push([key, value])
+            }else{
+                this.table[idx] = [[key, value]];
+            }
+        };
+    
+        getItem = key => {
+            const idx = hashKey(key, this.table.length)
+            if(!this.table[idx]) {
+                return null 
+            }
+            return this.table[idx].find(x => x[0] === key)[1];
+        };
+    
+        removeItem = key => {
+            const idx = hashKey(key, this.table.length)
+            if(!this.table[idx]){
+                return null;
+            }else{
+                this.table[idx] = null;
+            }
+        };
+    }
+    
+    //////////-End of hashtable function-\\\\\\\\\\\
+    
+    
+    var serverIDList = new Hashtable();
+    var warnChannelList = new Hashtable();
+    var reportChannelList = new Hashtable();
+    var unbanLogsChannelList = new Hashtable();
+
     let args = message.content.substring(PREFIX.length).split(' ')
 
     if(args[0]=='sync'){
