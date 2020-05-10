@@ -515,7 +515,9 @@ bot.on('message', message=>{
 
             modHelp.addFields(
                 {name: '`!warn {user} {role} {reason}`', value: 'Warns {user} for {reason}, and gives {user} {role}.'},
-                {name: '`!kick {user} {reason}`', value: 'Kicks {user} for {reason}.'}
+                {name: '`!kick {user} {reason}`', value: 'Kicks {user} for {reason}.'},
+                {name: '`!ban {user} {reason}`', value: "Bans {user} for {reason}."},
+                {name: '`!unban {user} {reason}`', value: "Unbans {user} for {reason}."}
             );
             
             modHelp.setColor(embedColor)
@@ -569,35 +571,7 @@ bot.on('message', message=>{
         
             message.channel.send(roleTarget.id);
         break;
-        case 'helpadd':
-            if(!message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
-
-            /*args[1] = where the command goes
-            args[2] = the name of the command
-            args[3+] = the description of the command*/
-            
-            const descLength = 10 + args[1].length + args[2].length;
-
-            const cmdName = args[2];
-            const cmdDesc = args.join(' ').slice(descLength)
-            
-            
-            switch(args[1]){
-                case 'moderator':
-                    modHelp.addField({name: cmdName, value: cmdDesc})
-                break;
-                case 'cosmetic':
-                    cosHelp.addField({name: cmdName, value: cmdDesc})
-                break;
-            }
-            if (!args[1] === 'moderator', 'cosmetic') {
-                return message.reply("Correct usage is: `!helpadd {modarator/cosmetic} {command name and function} {command description}`")
-            }
-        break;
     }
-
-
-
 })
 
 bot.login(token);
