@@ -14,8 +14,6 @@ setInterval(() => {
 const Discord = require('discord.js');
 const bot = new Discord.Client();
 
-var test = ['a'['a','b'],'b'['a','b']]
-
 const token = process.env.TOKEN;
 
 var PREFIX = '!';
@@ -27,16 +25,14 @@ const embedImage = 'https://cdn.discordapp.com/avatars/257714467301752835/993e93
 
 const embedColor = '#008080'
 
-//Hashtable function
-
-
-
-
 bot.on('ready', () =>{
     console.log("I'm online!");
 })
 
 bot.on('message', message=>{
+    
+    /////-Hashtable Function-\\\\\
+    
     function hashKey(s, tableSize) {
         let hash = 17
     
@@ -393,17 +389,16 @@ bot.on('message', message=>{
             banEmbed.setFooter(footer, embedImage);
 
             warnChannel.send(banEmbed);
-        
         break;
         case 'unban':
             if(!message.guild.member(message.author).hasPermission('BAN_MEMBERS', "ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
 
 
             const unbUserID = args[1];
-            const unbUser = message.users.get(unbUserID);
+            const unbUser = bot.users.cache.get(unbUserID);
             if(!unbUser) return message.reply('Please specify a user ID! (Without < and >)');
 
-            unbanReason = args.join(' ').slice(27);
+            unbanReason = args.join(' ').slice(25);
             
             message.guild.members.unban(unbUser, { reason: unbanReason })
 
@@ -411,7 +406,7 @@ bot.on('message', message=>{
             
             
 
-
+            
             unbUser.createDM();
             unbUser.send(`You have been unbanned on ${message.guild.name} for: ${unbanReason}`);
 
@@ -429,8 +424,6 @@ bot.on('message', message=>{
             unbanEmbed.setFooter(footer, embedImage);
 
             unbanLogsChannel.send(unbanEmbed);
-
-
 
         break;
         case 'updateversion':
@@ -478,49 +471,72 @@ bot.on('message', message=>{
             dmUser.send(`${dmMessage} -- Message sent by: ${message.author}`);
 
             message.channel.send('Message sent!')
-            //.then(bDmMessage => { bDmMessage.delete(3000); });
-            
-            //message.delete(3000);
 
         break;
         case 'help':
             
-            //switch(args[1]){
-            //    case 'cosmetic':
-                    
-            //    break;
-            //    case 'moderator':
+            const helpEmbed = new Discord.MessageEmbed();
+            const modHelp = new Discord.MessageEmbed();
+            const cosHelp = new Discord.MessageEmbed();
 
-            //    break;
-            //}
-        
-        
-        
-            const helpEmbed = new Discord.MessageEmbed ;
-            
             helpEmbed.setTitle('Help')
             helpEmbed.setThumbnail(embedImage)
             
             helpEmbed.addFields(
-                {name: '`!help`', value: 'Brings up this help menu.'},
+                {name: 'To show Cosmetic/User Commands type:', value: '`!help cosmetic`', inline: true},
+                {name: 'To show Moderator Commands type:', value: '`!help moderator`', inline: true}
+            );
+            
+            helpEmbed.setColor(embedColor)
+            
+            helpEmbed.setFooter(footer, embedImage)
+            
+            /////cosmetic help\\\\\
+            
+            cosHelp.setTitle('Cosmetic Commands')
+            cosHelp.setThumbnail(embedImage)
+
+            cosHelp.addFields(
+                {name: '`!help`', value: 'Brings up the help menu.'},
                 {name: '`!hi`', value: 'A Cosmetic command that returns "Hello {user}" when typed.'},
                 {name: '`!reportuser {user} {reason}`', value: 'Reports {user} for {reason}'},
                 {name: '`!prefix info`', value: 'Shows all valid prefix commands.'},
                 {name: '`!version`', value: 'Shows my version.'}
             );
 
-            helpEmbed.addField('---', 'Modarator Commands')
+            cosHelp.setColor(embedColor)
             
-            helpEmbed.addFields(
+            cosHelp.setFooter(footer, embedImage)
+                
+            /////moderator help\\\\\
+
+            modHelp.setTitle('Modarator Commands');
+            modHelp.setThumbnail(embedImage);
+
+            modHelp.addFields(
                 {name: '`!warn {user} {role} {reason}`', value: 'Warns {user} for {reason}, and gives {user} {role}.'},
                 {name: '`!kick {user} {reason}`', value: 'Kicks {user} for {reason}.'}
-            )
-            helpEmbed.setColor(embedColor)
+            );
             
-            helpEmbed.setFooter(footer, embedImage)
+            modHelp.setColor(embedColor)
             
+            modHelp.setFooter(footer, embedImage)
             
-            message.channel.send(helpEmbed)
+            switch(args[1]){
+                case 'cosmetic':
+                   message.channel.send(cosHelp); 
+                break;
+                case 'moderator':
+                    message.channel.send(modHelp)
+                break;
+                case null:
+                    message.channel.send(helpEmbed)
+                break;
+            }
+            if (args[1] === 'cosmetic', 'moderator') {
+                return message.channel.send(helpEmbed);
+            }
+            
 
         break;
         case 'verify':
@@ -551,7 +567,32 @@ bot.on('message', message=>{
         
             const roleTarget = message.mentions.roles.first();
         
-            message.channel.send(roleTarget);
+            message.channel.send(roleTarget.id);
+        break;
+        case 'helpadd':
+            if(message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
+
+            /*args[1] = where the command goes
+            args[2] = the name of the command
+            args[3+] = the description of the command*/
+            
+            const descLength = 10 + args[1].length + args[2].length;
+
+            const cmdName = args[2];
+            const cmdDesc = args.join(' ').slice(descLength)
+            
+            
+            switch(args[1]){
+                case 'modarator':
+                    modHelp.addField({name: cmdName, value: cmdDesc})
+                break;
+                case 'cosmetic':
+                    cosHelp.addField({name: cmdName, value: cmdDesc})
+                break;
+            }
+            if (!args[1] === 'moderator', 'cosmetic') {
+                return message.reply("Correct usage is: `!helpadd {modarator/cosmetic} {command name and function} {command description}`")
+            }
         break;
     }
 
