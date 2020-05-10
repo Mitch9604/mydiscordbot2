@@ -14,8 +14,6 @@ setInterval(() => {
 const Discord = require('discord.js');
 const bot = new Discord.Client();
 
-var test = ['a'['a','b'],'b'['a','b']]
-
 const token = process.env.TOKEN;
 
 var PREFIX = '!';
@@ -27,16 +25,14 @@ const embedImage = 'https://cdn.discordapp.com/avatars/257714467301752835/993e93
 
 const embedColor = '#008080'
 
-//Hashtable function
-
-
-
-
 bot.on('ready', () =>{
     console.log("I'm online!");
 })
 
 bot.on('message', message=>{
+    
+    /////-Hashtable Function-\\\\\
+    
     function hashKey(s, tableSize) {
         let hash = 17
     
@@ -378,14 +374,14 @@ bot.on('message', message=>{
             bUser.createDM();
             bUser.send(`You have been banned from ${message.guild.name} for: ${banReason}`);
 
-            message.guild.members.ban(bMember);
+            message.guild.members.ban(bMember, { reason: banReason });
 
             const banEmbed = new Discord.MessageEmbed();
 
-            banEmbed.setTitle(`Ban | ${kUser.username}`);
+            banEmbed.setTitle(`Ban | ${bUser.username}`);
 
             banEmbed.addFields(
-                {name: 'Member', value: kUser, inline: true},
+                {name: 'Member', value: bUser, inline: true},
                 {name: 'Modarator', value: message.author, inline: true},
                 {name: 'Reason', value: banReason}
             );
@@ -393,29 +389,29 @@ bot.on('message', message=>{
             banEmbed.setFooter(footer, embedImage);
 
             warnChannel.send(banEmbed);
-        
         break;
         case 'unban':
             if(!message.guild.member(message.author).hasPermission('BAN_MEMBERS', "ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
 
 
-            const unbUser = args[1];
+            const unbUserID = args[1];
+            const unbUser = bot.users.cache.get(unbUserID);
             if(!unbUser) return message.reply('Please specify a user ID! (Without < and >)');
 
+            unbanReason = args.join(' ').slice(27);
             
-            message.guild.members.unban(unbUser)
+            message.guild.members.unban(unbUser, { reason: unbanReason })
 
             const unbanEmbed = new Discord.MessageEmbed();
             
-            unbanReason = args.join(' ').slice(27);
+            
 
-
+            
             unbUser.createDM();
             unbUser.send(`You have been unbanned on ${message.guild.name} for: ${unbanReason}`);
 
-            const unbMember = message.guild.members.fetch(unbUser);
 
-            unbanEmbed.setTitle(`Unban | ${unbMember.username}`);
+            unbanEmbed.setTitle(`Unban | ${unbUser.username}`);
             
             unbanEmbed.addFields(
                 {name: 'User', value: unbUser, inline: true},
@@ -428,8 +424,6 @@ bot.on('message', message=>{
             unbanEmbed.setFooter(footer, embedImage);
 
             unbanLogsChannel.send(unbanEmbed);
-
-
 
         break;
         case 'updateversion':
@@ -467,58 +461,86 @@ bot.on('message', message=>{
         case 'dmuser':
             if(!message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
         
-            let dmUser = args[1]
-            if(!args[1]) return message.reply("Please specify a user id!");
-            if(dmUser.length !== 18) return message.reply("Please specify a user id!");
+            let dmUser = message.mentions.users.first()
+            if(!dmUser) return message.reply("Please mention a user!");
+            //if(dmUser.length !== 18) return message.reply("Please mention a user!");
 
-            
+            var dmMessage = args.join(' ').slice(30)    
+        
             dmUser.createDM();
             dmUser.send(`${dmMessage} -- Message sent by: ${message.author}`);
 
             message.channel.send('Message sent!')
-            .then(bDmMessage => { bDmMessage.delete(3000); });
-            
-            message.delete(3000);
 
         break;
         case 'help':
             
-            //switch(args[1]){
-            //    case 'cosmetic':
-                    
-            //    break;
-            //    case 'moderator':
-
-            //    break;
-            //}
-        
-        
-        
-            const helpEmbed = new Discord.MessageEmbed ;
             
+        
+        
+        
+            const helpEmbed = new Discord.MessageEmbed();
+            const modHelp = new Discord.MessageEmbed();
+            const cosHelp = new Discord.MessageEmbed();
+
             helpEmbed.setTitle('Help')
             helpEmbed.setThumbnail(embedImage)
             
             helpEmbed.addFields(
-                {name: '`!help`', value: 'Brings up this help menu.'},
+                {name: 'To show Cosmetic/User Commands type:', value: '`!help cosmetic`', inline: true},
+                {name: 'To show Moderator Commands type:', value: '`!help moderator`', inline: true}
+            );
+            
+            helpEmbed.setColor(embedColor)
+            
+            helpEmbed.setFooter(footer, embedImage)
+            
+            /////cosmetic help\\\\\
+            
+            cosHelp.setTitle('Cosmetic Commands')
+            cosHelp.setThumbnail(embedImage)
+
+            cosHelp.addFields(
+                {name: '`!help`', value: 'Brings up the help menu.'},
                 {name: '`!hi`', value: 'A Cosmetic command that returns "Hello {user}" when typed.'},
                 {name: '`!reportuser {user} {reason}`', value: 'Reports {user} for {reason}'},
                 {name: '`!prefix info`', value: 'Shows all valid prefix commands.'},
                 {name: '`!version`', value: 'Shows my version.'}
             );
 
-            helpEmbed.addField('---', 'Modarator Commands')
+            cosHelp.setColor(embedColor)
             
-            helpEmbed.addFields(
+            cosHelp.setFooter(footer, embedImage)
+                
+            /////moderator help\\\\\
+
+            modHelp.setTitle('Modarator Commands');
+            modHelp.setThumbnail(embedImage);
+
+            modHelp.addFields(
                 {name: '`!warn {user} {role} {reason}`', value: 'Warns {user} for {reason}, and gives {user} {role}.'},
                 {name: '`!kick {user} {reason}`', value: 'Kicks {user} for {reason}.'}
-            )
-            helpEmbed.setColor(embedColor)
+            );
             
-            helpEmbed.setFooter(footer, embedImage)
+            modHelp.setColor(embedColor)
             
+            modHelp.setFooter(footer, embedImage)
             
-            message.channel.send(helpEmbed)
+            switch(args[1]){
+                case 'cosmetic':
+                   message.channel.send(cosHelp); 
+                break;
+                case 'moderator':
+                    message.channel.send(modHelp)
+                break;
+                case null:
+                    message.channel.send(helpEmbed)
+                break;
+            }
+            if (args[1] === 'cosmetic', 'moderator') {
+                return message.channel.send(helpEmbed);
+            }
+            
 
         break;
         case 'verify':
@@ -550,6 +572,31 @@ bot.on('message', message=>{
             const roleTarget = message.mentions.roles.first();
         
             message.channel.send(roleTarget.id);
+        break;
+        case 'helpadd':
+            if(message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
+
+            /*args[1] = where the command goes
+            args[2] = the name of the command
+            args[3+] = the description of the command*/
+            
+            const descLength = 10 + args[1].length + args[2].length;
+
+            const cmdName = args[2];
+            const cmdDesc = args.join(' ').slice(descLength)
+            
+            
+            switch(args[1]){
+                case 'modarator':
+                    modHelp.addField({name: cmdName, value: cmdDesc})
+                break;
+                case 'cosmetic':
+                    cosHelp.addField({name: cmdName, value: cmdDesc})
+                break;
+            }
+            if (!args[1] === 'moderator', 'cosmetic') {
+                return message.reply("Correct usage is: `!helpadd {modarator/cosmetic} {command name and function} {command description}`")
+            }
         break;
     }
 
