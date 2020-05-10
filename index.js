@@ -398,7 +398,7 @@ bot.on('message', message=>{
             const unbUser = bot.users.cache.get(unbUserID);
             if(!unbUser) return message.reply('Please specify a user ID! (Without < and >)');
 
-            unbanReason = args.join(' ').slice(27);
+            unbanReason = args.join(' ').slice(25);
             
             message.guild.members.unban(unbUser, { reason: unbanReason })
 
@@ -570,7 +570,7 @@ bot.on('message', message=>{
             message.channel.send(roleTarget.id);
         break;
         case 'helpadd':
-            if(message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
+            if(!message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
 
             /*args[1] = where the command goes
             args[2] = the name of the command
@@ -583,7 +583,7 @@ bot.on('message', message=>{
             
             
             switch(args[1]){
-                case 'modarator':
+                case 'moderator':
                     modHelp.addField({name: cmdName, value: cmdDesc})
                 break;
                 case 'cosmetic':
