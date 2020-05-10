@@ -378,14 +378,14 @@ bot.on('message', message=>{
             bUser.createDM();
             bUser.send(`You have been banned from ${message.guild.name} for: ${banReason}`);
 
-            message.guild.members.ban(bMember);
+            message.guild.members.ban(bMember, { reason: banReason });
 
             const banEmbed = new Discord.MessageEmbed();
 
-            banEmbed.setTitle(`Ban | ${kUser.username}`);
+            banEmbed.setTitle(`Ban | ${bUser.username}`);
 
             banEmbed.addFields(
-                {name: 'Member', value: kUser, inline: true},
+                {name: 'Member', value: bUser, inline: true},
                 {name: 'Modarator', value: message.author, inline: true},
                 {name: 'Reason', value: banReason}
             );
@@ -399,23 +399,24 @@ bot.on('message', message=>{
             if(!message.guild.member(message.author).hasPermission('BAN_MEMBERS', "ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
 
 
-            const unbUser = args[1];
+            const unbUserID = args[1];
+            const unbUser = message.users.get(unbUserID);
             if(!unbUser) return message.reply('Please specify a user ID! (Without < and >)');
 
+            unbanReason = args.join(' ').slice(27);
             
-            message.guild.members.unban(unbUser)
+            message.guild.members.unban(unbUser, { reason: unbanReason })
 
             const unbanEmbed = new Discord.MessageEmbed();
             
-            unbanReason = args.join(' ').slice(27);
+            
 
 
             unbUser.createDM();
             unbUser.send(`You have been unbanned on ${message.guild.name} for: ${unbanReason}`);
 
-            const unbMember = message.guild.members.fetch(unbUser);
 
-            unbanEmbed.setTitle(`Unban | ${unbMember.username}`);
+            unbanEmbed.setTitle(`Unban | ${unbUser.username}`);
             
             unbanEmbed.addFields(
                 {name: 'User', value: unbUser, inline: true},
@@ -477,9 +478,9 @@ bot.on('message', message=>{
             dmUser.send(`${dmMessage} -- Message sent by: ${message.author}`);
 
             message.channel.send('Message sent!')
-            .then(bDmMessage => { bDmMessage.delete(3000); });
+            //.then(bDmMessage => { bDmMessage.delete(3000); });
             
-            message.delete(3000);
+            //message.delete(3000);
 
         break;
         case 'help':
