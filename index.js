@@ -467,11 +467,12 @@ bot.on('message', message=>{
         case 'dmuser':
             if(!message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
         
-            let dmUser = args[1]
-            if(!args[1]) return message.reply("Please specify a user id!");
-            if(dmUser.length !== 18) return message.reply("Please specify a user id!");
+            let dmUser = message.mentions.users.first()
+            if(!dmUser) return message.reply("Please mention a user!");
+            //if(dmUser.length !== 18) return message.reply("Please mention a user!");
 
-            
+            var dmMessage = args.join(' ').slice(30)    
+        
             dmUser.createDM();
             dmUser.send(`${dmMessage} -- Message sent by: ${message.author}`);
 
@@ -549,7 +550,7 @@ bot.on('message', message=>{
         
             const roleTarget = message.mentions.roles.first();
         
-            message.channel.send(roleTarget.id);
+            message.channel.send(roleTarget);
         break;
     }
 
