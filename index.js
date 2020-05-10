@@ -474,10 +474,6 @@ bot.on('message', message=>{
 
         break;
         case 'help':
-            
-            
-        
-        
         
             const helpEmbed = new Discord.MessageEmbed();
             const modHelp = new Discord.MessageEmbed();
