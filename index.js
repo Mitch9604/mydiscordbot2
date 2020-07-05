@@ -13,10 +13,27 @@ setInterval(() => {
 
 const Discord = require('discord.js');
 const bot = new Discord.Client();
+const fs = require('fs')
+
+
+///// external files \\\\\
+
+const warnChannels = require("./warnChannels.json")
+const reportChannels = require("./reportChannels.json")
+const unbanChannels = require("./unbanLogsChannels.json")
+
+console.log("Warnchannels.json");
+console.log(warnChannels);
+
+console.log("Reportchannels.json");
+console.log(reportChannels);
+
+console.log("Unbanlogchannels.json");
+console.log(unbanChannels)
 
 const token = process.env.TOKEN;
 
-var PREFIX = '!';
+const PREFIX = ':';
 
 var version = '0.0.1'
 
@@ -29,11 +46,11 @@ bot.on('ready', () =>{
     console.log("I'm online!");
 })
 
-bot.on('message', message=>{
+bot.on('message', message =>{
     
     /////-Hashtable Function-\\\\\
     
-    function hashKey(s, tableSize) {
+    /*function hashKey(s, tableSize) {
         let hash = 17
     
         for (var i = 0; i < s.length; i++){
@@ -41,9 +58,9 @@ bot.on('message', message=>{
         }
         return hash;
     }
+    */
     
-    
-    class Hashtable {
+    /*class Hashtable {
         
         table = new Array(5)
         
@@ -72,99 +89,186 @@ bot.on('message', message=>{
                 this.table[idx] = null;
             }
         };
-    }
+    }*/
     
     //////////-End of hashtable function-\\\\\\\\\\\
     
-    
+    /*
     var serverIDList = new Hashtable();
     var warnChannelList = new Hashtable();
     var reportChannelList = new Hashtable();
     var unbanLogsChannelList = new Hashtable();
-
-    let args = message.content.substring(PREFIX.length).split(' ')
-
-    if(args[0]=='sync'){
-        
-        if(!message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!")
-
-        if(!serverIDList.getItem(message.guild.id) == null) return message.reply("Bot has already been synced.");
-        serverIDList.setItem(message.guild.id, message.guild.id);
-        message.channel.send("I have finished syncing to your server")
+    */
     
-    }else{};
+    let args = message.content.substring(PREFIX.length).split(' ');
+
+    if (!message.guild) return ;
+    const serverId = message.guild.id;
+    
+    
+
+  
+    if (!message.content.startsWith(PREFIX)) return null;
     if(args[0] == 'set'){
         switch(args[1]){
         
             case 'warnchannel':
-                var channelID = args[2];
-                if(channelID.length !== 18){
+                var warnchannelID = args[2];
+                if(warnchannelID.length !== 18){
                     return message.reply('This ID is not valid.')
                 }
                 
-                if(warnChannelList.getItem(message.guild.id) == null){
-                    warnChannelList.setItem(message.guild.id, channelID);
+                if(!bot.channels.cache.find(channel => channel.id === warnchannelID)) return message.reply("Channel ID not valid!");
+
+                
+  
+                if (warnChannels[serverId]){
+                    warnChannels[serverId] = null
+                    
+                    warnChannels[serverId] = warnchannelID
+                  
+                    var data = JSON.stringify(warnChannels, null, 4);
+                    
+                    fs.writeFile("./warnChannels.json", data, finished)
+                    function finished(err){
+                        if(err) throw err;
+                        message.reply('Set Warn Channel!');
+                    };
+                }else{
+                
+                    warnChannels[serverId] = warnchannelID
+            
+                    var data = JSON.stringify(warnChannels, null, 4)
+                    
+                    fs.writeFile("./warnChannels.json", data, finished)
+                    function finished(err){
+                        if(err) throw err;
+                        message.reply('Set Warn Channel!');
+                    };
+                };
+
+                /*if(warnChannelList.getItem(message.guild.id) == null){
+                    warnChannelList.setItem(message.guild.id, warnchannelID);
+                    
+                    var serverId = message.guild.id
+
+                    warnChannels[serverId] = warnchannelID
+                    
+                    fs.writeFile("./warnChannels.json", JSON.stringify(warnChannels, null, 4), err => {
+                        if(err) throw err;
+                        
+                    })
+
                 }else{
                     warnChannelList.removeItem(message.guild.id)
                     warnChannelList.setItem(message.guild.id, channelID)
+
+                    /*fs.writeFile('./warnChannels.json', JSON.stringify(warnChannelList, null, 4), err => {
+                        if (err) throw err;
+                    });
                 }
+                */
+            
                 
-                message.reply('Set Warn Channel!')
             break;
             case 'reportlogchannel':
-                var channelID = args[2];
-                if(channelID.length !== 18){
+                var reportchannelID = args[2];
+                if(reportchannelID.length !== 18){
                     return message.reply('This ID is not valid.')
                 }
 
-                if(reportChannelList.getItem(message.guild.id) == null){
-                    reportChannelList.setItem(message.guild.id, channelID);
-                }else{
-                    reportChannelList.removeItem(message.guild.id)
-                    reportChannelList.setItem(message.guild.id, channelID)
-                }
+                if(!bot.channels.cache.find(channel => channel.id === reportchannelID)){
+                    return message.reply("Channel ID not valid!")
+                };
 
-                message.reply('Set Report logs Channel')
+
+                if (reportChannels[serverId]){
+                    reportChannels[serverId] = null
+                    
+                    reportChannels[serverId] = reportchannelID
+                  
+                    var data = JSON.stringify(reportChannels, null, 4);
+                    
+                    fs.writeFile("./reportChannels.json", data, finished)
+                    function finished(err){
+                        if(err) throw err;
+                        message.reply('Set Report Logs Channel!');
+                    };
+                }else{
+                
+                    reportChannels[serverId] = reportchannelID
+            
+                    var data = JSON.stringify(reportChannels, null, 4)
+                    
+                    fs.writeFile("./reportChannels.json", data, finished)
+                    function finished(err){
+                        if(err) throw err;
+                        message.reply('Set Report logs Channel!');
+                    };
+                };
+
+                
             break;
             case 'unbanlogchannel':
-                var channelID = args[2];
+                var unbanchannelID = args[2];
                 if(channelID.length !== 18){
                     return message.reply('This ID is not valid.')
-                }
+                };
                 
-                if(unbanLogsChannelList.getItem(message.guild.id) == null){
-                    unbanLogsChannelList.setItem(message.guild.id, channelID);
-                }else{
-                    unbanLogsChannelList.removeItem(message.guild.id)
-                    unbanLogsChannelList.setItem(message.guild.id, channelID)
-                }
+                if(!bot.channels.cache.find(channel => channel.id === channelID)){
+                    return message.reply("Channel ID not valid!")
+                };
 
-                message.reply('Set Unban Logs Channel')
+  
+                if (unbanChannels[serverId]){
+                    unbanChannels[serverId] = null
+                    
+                    unbanChannels[serverId] = unbanchannelID
+                  
+                    var data = JSON.stringify(unbanChannels, null, 4);
+                    
+                    fs.writeFile("./unbanLogsChannels.json", data, finished)
+                    function finished(err){
+                        if(err) throw err;
+                        message.reply('Set Unban Logs Channel!');
+                    };
+                }else{
+                
+                    unbanChannels[serverId] = unbanchannelID
+            
+                    var data = JSON.stringify(unbanChannels, null, 4)
+                    
+                    fs.writeFile("./unbanLogsChannels.json", data, finished)
+                    function finished(err){
+                        if(err) throw err;
+                        message.reply('Set Unaban Logs Channel!');
+                    };
+                };
             break;
         }
         
         if (args[1] == null){
             return message.reply('Wrong usage! The correct usages are: `!set warnchannel {Channel ID}`, `!set reportlogchannel {Channel ID}`, `!set unbanlogchannel {Channel ID}`')
-        }    
-    }
+        };
+        
+    }   
     
-    if(!warnChannelList.getItem(message.guild.id)){
-        var warnChannelID = message.channel.id
+    if(warnChannels[serverId] == null){
+        var warnChannelID = serverId;
     }else{
-        var warnChannelID = warnChannelList.getItem(message.guild.id);
+        var warnChannelID = warnChannels[serverId];
     };
 
-    
-    if(!reportChannelList.getItem(message.guild.id)){
-        var reportChannelID = message.channel.id;
+    if(reportChannels[serverId] = null){
+        var reportChannelID = serverId;
     }else{
-        var reportChannelID = reportChannelList.getItem(message.guild.id);
+        var reportChannelID = reportChannels[serverId];
     };
 
-    if(!unbanLogsChannelList.getItem(message.guild.id)){
-        var unbanLogsChannelID = message.channel.id
+    if(unbanChannels[serverId] == null){
+        var unbanLogsChannelID = serverId;
     }else{
-        var unbanLogsChannelID = unbanLogsChannelList.getItem(message.guild.id)
+        var unbanLogsChannelID = unbanChannels[serverId];
     };
     
     
@@ -215,6 +319,7 @@ bot.on('message', message=>{
 
     
             if(!message.guild.member(message.author).hasPermission(['KICK_MEMBERS', 'ADMINISTRATOR'])) return message.reply("Sorry you can't do that!");
+            
 
             const wUser = message.mentions.users.first();
             if(!wUser) return message.reply('user does not exsist');
@@ -222,7 +327,7 @@ bot.on('message', message=>{
             let wMember = message.guild.member(wUser);
             if(!wMember) return message.reply('Couldnt find member');
 
-            
+            if(wMember.hasPermission('ADMINISTRATOR')) return message.reply("I do not have sufficient permissions to warn this player -- Please consult with the owner or warn the player manually.")
 
             const wRole = message.mentions.roles.first();
             if (!wRole) return message.reply('Please specify a role');
@@ -242,7 +347,7 @@ bot.on('message', message=>{
             const warnreason = args.join(' ').slice(51);
             
             wUser.createDM();
-                wUser.send(`You have been warned on DaMitchServer for "${warnreason}."`);
+            wUser.send(`You have been warned on DaMitchServer for "${warnreason}."`);
             
             
             
@@ -286,7 +391,7 @@ bot.on('message', message=>{
             //message.channel.send(wMember.user.username + ' has been warned. Reason:' +warnreason+ '. their role is now ' + wRole.name);
             warnChannel.send(warnembed);
             
-            
+            console.log(`Warned ${wUser} on ${message.guild.id} for ${warnreason}`)
 
         break;
         case 'reportuser':
@@ -474,7 +579,7 @@ bot.on('message', message=>{
 
         break;
         case 'help':
-            
+        
             const helpEmbed = new Discord.MessageEmbed();
             const modHelp = new Discord.MessageEmbed();
             const cosHelp = new Discord.MessageEmbed();
@@ -515,7 +620,9 @@ bot.on('message', message=>{
 
             modHelp.addFields(
                 {name: '`!warn {user} {role} {reason}`', value: 'Warns {user} for {reason}, and gives {user} {role}.'},
-                {name: '`!kick {user} {reason}`', value: 'Kicks {user} for {reason}.'}
+                {name: '`!kick {user} {reason}`', value: 'Kicks {user} for {reason}.'},
+                {name: '`!ban {user} {reason}`', value: "Bans {user} for {reason}."},
+                {name: '`!unban {user} {reason}`', value: "Unbans {user} for {reason}."}
             );
             
             modHelp.setColor(embedColor)
@@ -568,31 +675,6 @@ bot.on('message', message=>{
             const roleTarget = message.mentions.roles.first();
         
             message.channel.send(roleTarget.id);
-        break;
-        case 'helpadd':
-            if(message.guild.member(message.author).hasPermission("ADMINISTRATOR")) return message.reply("Sorry, you can't do that!");
-
-            /*args[1] = where the command goes
-            args[2] = the name of the command
-            args[3+] = the description of the command*/
-            
-            const descLength = 10 + args[1].length + args[2].length;
-
-            const cmdName = args[2];
-            const cmdDesc = args.join(' ').slice(descLength)
-            
-            
-            switch(args[1]){
-                case 'modarator':
-                    modHelp.addField({name: cmdName, value: cmdDesc})
-                break;
-                case 'cosmetic':
-                    cosHelp.addField({name: cmdName, value: cmdDesc})
-                break;
-            }
-            if (!args[1] === 'moderator', 'cosmetic') {
-                return message.reply("Correct usage is: `!helpadd {modarator/cosmetic} {command name and function} {command description}`")
-            }
         break;
     }
 
